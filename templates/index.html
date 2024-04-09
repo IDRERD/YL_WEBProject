@@ -3,9 +3,9 @@
 {% block content %}
 <link rel="stylesheet" type="text/css" href="../static/css/index.css">
 <h1 style="text-align: center;">Recently added products</h1>
-{% if current_user.is_authenticated %}
+<!--{/% if current_user.is_authenticated %/}
     <a href="products" class="btn btn-secondary">Set sell order</a>
-{% endif %}
+{/% endif %/}-->
 {% for product in products%}
 <div class="col-md6 border rounded">
     <h2>{{product.name.capitalize()}}</h2>
