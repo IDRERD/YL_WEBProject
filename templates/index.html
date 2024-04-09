@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" type="text/css" href="../static/css/index.css">
+<h1 style="text-align: center;">Recently added products</h1>
+{% if current_user.is_authenticated %}
+    <a href="products" class="btn btn-secondary">Set sell order</a>
+{% endif %}
+{% for product in products%}
+<div class="col-md6 border rounded">
+    <h2>{{product.name.capitalize()}}</h2>
+    <div>
+        {%if flags[loop.index0]%}
+        <a href="/products/{{ product.id }}" class="btn btn-warning">
+            Edit
+        </a>
+        <a href="/delete_product/{{ product.id }}" class="btn btn-danger">
+            Delete
+        </a>
+        {%endif%}
+    </div>
+    <div class="tml">
+        Seller: {{product.seller.name}}
+    </div>
+    <div class="tml">
+        Price: {{product.price}}
+    </div>
+    {%if not product.in_stock%}
+    <div class="tml">Product is out of stock</div>
+    {%else%}
+    <div class="tml">There are {{product.count}} products in stock</div>
+    {%endif%}
+</div>
+{% endfor %}
+{% endblock %}
