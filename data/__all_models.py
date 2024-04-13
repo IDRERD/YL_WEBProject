@@ -1,2 +1,2 @@
-from products import Product
-from users import User
+from data.products import Product
+from data.users import User
