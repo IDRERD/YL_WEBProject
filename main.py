@@ -1,11 +1,12 @@
 import flask
 from flask_login import *
-
 from data import db_session
 from data.forms.register import RegisterForm
 from data.products import Product
 from data.users import User
 from data.forms.login import LoginForm
+from data.forms.products import ProductForm
+from data.tag import Tag
 
 app = flask.Flask(__name__)
 app.config["SECRET_KEY"] = "YliDrERdweBPrOjecTseCrEtKEyhOwThEheCkwIllyOuSeaRcHfORTHaT"
@@ -24,7 +25,7 @@ def main():
 def index():
     dbs = db_session.create_session()
     products = dbs.query(Product).all()
-    return flask.render_template("index.html", title="TradeMark'ed", products=products)
+    return flask.render_template("index.html", title="TradeMark'ed", products=products  )
 
 
 @app.route("/register", methods=["POST", "GET"])
@@ -71,6 +72,27 @@ def logout():
 def load_user(user_id):
     dbs = db_session.create_session()
     return dbs.query(User).get(user_id)
+
+
+@app.route("/products", methods=["POST", "GET"])
+def add_product():
+    form = ProductForm()
+    if form.validate_on_submit():
+        dbs = db_session.create_session()
+        seller = dbs.query(User).get(current_user.id)
+        product = Product(name=form.name.data, seller_id=current_user.id, seller=seller, price=form.price.data, count=form.count.data, in_stock=True)
+        for tg in form.tags.data:
+            tag = dbs.query(Tag).filter(Tag.name == tg).first()
+            if not tag:
+                tag = Tag(name=tg)
+                dbs.add(tag)
+                dbs.commit()
+            product.tags.append(tag)
+        dbs.add(product)
+        dbs.commit()
+        return flask.redirect("/my_products")
+    else:
+        return flask.render_template("product.html", title="Add Product", paragraph_title="Add Product", form=form)
 
 if __name__ == "__main__":
     main()

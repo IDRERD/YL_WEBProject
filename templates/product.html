@@ -1,0 +1,47 @@
+{%extends "base.html"%}
+{%block content%}
+<h1>{{paragraph_title}}</h1>
+<form action="" method="post">
+	{{form.hidden_tag()}}
+	<p>
+		{{form.name.label}}	<br>
+		{{form.name(class="form-control")}}<br>
+		{%for error in form.name.errors%}
+			<p class="alert alert-danger" role="alert">
+				{{error}}
+			</p>
+		{%endfor%}
+	</p>
+	<p>
+		{{form.price.label}}<br>
+		{{form.price(class="form-control")}}<br>
+		{%for error in form.price.errors%}
+			<p class="alert alert-danger" role="alert">
+				{{error}}
+			</p>
+		{%endfor%}
+	</p>
+	<p>
+		{{form.count.label}}<br>
+		{{form.count(class="form-control")}}<br>
+		{%for error in form.count.errors%}
+			<p class="alert alert-danger" role="alert">
+				{{error}}
+			</p>
+		{%endfor%}
+	</p>
+	<p>
+		{{form.tags.label}}<br>
+		{{form.tags(class="form-control")}}<br>
+		{%for error in form.tags.errors%}
+			<p class="alert alert-danger" role="alert">
+				{{error}}
+			</p>
+		{%endfor%}
+	</p>
+	<p>
+		{{form.submit.label}}<br>
+		{{form.submit(class="btn btn-primary", type="submit")}}
+	</p>
+</form>
+{%endblock%}
