@@ -76,6 +76,8 @@ def load_user(user_id):
 
 @app.route("/products", methods=["POST", "GET"])
 def add_product():
+    if isinstance(current_user, AnonymousUserMixin):
+        return flask.redirect("/login")
     form = ProductForm()
     if form.validate_on_submit():
         dbs = db_session.create_session()
@@ -93,6 +95,54 @@ def add_product():
         return flask.redirect("/my_products")
     else:
         return flask.render_template("product.html", title="Add Product", paragraph_title="Add Product", form=form)
+
+
+@app.route("/my_products")
+def my_products():
+    if not current_user.is_authenticated:
+        return flask.redirect("/login")
+    dbs = db_session.create_session()
+    products = dbs.query(Product).filter(Product.seller_id == current_user.id)
+    return flask.render_template("my_products.html", title="My Products", products=products)
+
+
+@app.route("/products/<int:product_id>", methods=["POST", "GET"])
+def edit_product(product_id):
+    if isinstance(current_user, AnonymousUserMixin):
+        return flask.redirect("/login")
+    form = ProductForm()
+    if flask.request.method == "GET":
+        dbs = db_session.create_session()
+        product = dbs.query(Product).get(product_id)
+        if product and current_user.id == product.seller_id:
+            form.name.data = product.name
+            form.count.data = product.count
+            form.price.data = product.price
+        else:
+            flask.abort(404)
+    if form.validate_on_submit():
+        dbs = db_session.create_session()
+        product = dbs.query(Product).get(product_id)
+        if product and current_user.id == product.seller_id:
+            product.name = form.name.data
+            product.count = form.count.data
+            product.price = form.price.data
+            dbs.commit()
+        else:
+            flask.abort(404)
+    return flask.render_template("product.html", title="Edit product", form=form, paragraph_title="Edit product")
+
+
+@app.route("/delete_product/<int:product_id>")
+def delete(product_id):
+    if isinstance(current_user, AnonymousUserMixin):
+        return flask.redirect("/login")
+    dbs = db_session.create_session()
+    product = dbs.query(Product).get(product_id)
+    if not isinstance(current_user, AnonymousUserMixin) and current_user.id == product.seller_id:
+        dbs.delete(product)
+        dbs.commit()
+    return flask.redirect("/my_products")
 
 if __name__ == "__main__":
     main()

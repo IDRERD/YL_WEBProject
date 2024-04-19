@@ -2,30 +2,34 @@
 
 {% block content %}
 <link rel="stylesheet" type="text/css" href="../static/css/index.css">
-<h1 style="text-align: center;">Recently added products</h1>
+<h1 style="text-align: center;">Your products</h1>
 {% if current_user.is_authenticated %}
     <a href="products" class="btn btn-secondary">Set sell order</a>
-    <a href="my_products" class="btn btn-secondary">See your selling products</a>
-{% endif %}
 {% for product in products%}
 <div class="col-md6 border rounded">
-    <h2>{{product.name}}</h2>
+    <h2>{{product.name.capitalize()}}</h2>
+    <div>
+        <a href="/products/{{ product.id }}" class="btn btn-warning">
+            Edit
+        </a>
+        <a href="/delete_product/{{ product.id }}" class="btn btn-danger">
+            Delete
+        </a>
+    </div>
     <div class="tml">
         Seller: {{product.seller.name}}
     </div>
     <div class="tml">
         Price: {{product.price}}
     </div>
-    {%if current_user.is_authenticated%}
-    {%if product.seller_id != current_user.id%}
-    <a href="/buy_product/{{product.id}}" class="btn btn-success">Buy</a>
-    {%endif%}
-    {%endif%}
     {%if not product.in_stock%}
     <div class="tml">Product is out of stock</div>
     {%else%}
-    <div class="tml">There are {{product.count}} products in stock</div>
+    <div class="tml">Products in stock: {{product.count}}</div>
     {%endif%}
 </div>
 {% endfor %}
+{%else%}
+<h1>To see content of this page you have to authorize</h1>
+{% endif %}
 {% endblock %}

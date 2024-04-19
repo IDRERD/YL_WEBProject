@@ -13,7 +13,7 @@ class Product(SqlAlchemyBase, SerializerMixin):
     seller_id = sa.Column(sa.Integer, sa.ForeignKey("users.id"))
     seller = orm.relationship("User")
     tags = orm.relationship("Tag", secondary="association", backref="products")
-    price = sa.Column(sa.Integer, default=0)
+    price = sa.Column(sa.Double, default=0.0)
     count = sa.Column(sa.Integer, default=0)
     in_stock = sa.Column(sa.Boolean, default=False)
     sell_date = sa.Column(sa.DateTime, default=datetime.datetime.now())

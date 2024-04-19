@@ -14,6 +14,7 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     email = sa.Column(sa.String, nullable=False, unique=True)
     hashed_password = sa.Column(sa.String, nullable=True)
     products = orm.relationship("Product", back_populates="seller")
+    balance = sa.Column(sa.Integer, nullable=False, default=0)
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)
