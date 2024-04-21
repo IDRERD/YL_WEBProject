@@ -1,0 +1,10 @@
+{%extends "base.html"%}
+{%block content%}
+<h1 style="text-align: center;">{{product.name}}</h1>
+<form action="" method="post">
+	{{form.hidden_tag()}}
+	<p>
+		{{form.buy(type="submit", class="btn btn-primary", style="width: 100%;")}}
+	</p>
+</form>
+{%endblock%}

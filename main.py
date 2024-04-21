@@ -7,6 +7,7 @@ from data.users import User
 from data.forms.login import LoginForm
 from data.forms.products import ProductForm
 from data.tag import Tag
+from data.forms.buy import BuyForm
 
 app = flask.Flask(__name__)
 app.config["SECRET_KEY"] = "YliDrERdweBPrOjecTseCrEtKEyhOwThEheCkwIllyOuSeaRcHfORTHaT"
@@ -143,6 +144,18 @@ def delete(product_id):
         dbs.delete(product)
         dbs.commit()
     return flask.redirect("/my_products")
+
+
+@app.route("/buy_product/<int:product_id>", methods=["POST", "GET"])
+def buy_product(product_id):
+    if isinstance(current_user, AnonymousUserMixin):
+        return flask.redirect("/login")
+    form = BuyForm()
+    dbs = db_session.create_session()
+    product = dbs.query(Product).get(product_id)
+    if form.validate_on_submit():
+        pass
+    return flask.render_template("buy_product.html", form=form, product=product)
 
 if __name__ == "__main__":
     main()
