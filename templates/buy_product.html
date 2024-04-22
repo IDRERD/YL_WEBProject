@@ -1,10 +1,38 @@
 {%extends "base.html"%}
 {%block content%}
+<script type="text/javascript">
+	function setValue(value){
+		document.getElementById("cost").innerHTML=value * {{product.price}};
+	}
+	function loaded(){
+		setValue(document.getElementById("counter").value);
+	}
+	document.addEventListener("DOMContentLoaded", loaded);
+</script>
 <h1 style="text-align: center;">{{product.name}}</h1>
+{%if product.in_stock%}
+<h3>{{product.count}} available</h3>
+{%else%}
+<h3>Product is out of stock</h3>
+{%endif%}
+<h4>Price: {{product.price}}</h4>
 <form action="" method="post">
 	{{form.hidden_tag()}}
 	<p>
-		{{form.buy(type="submit", class="btn btn-primary", style="width: 100%;")}}
+		{{form.count.label}}:<br>
+		{{form.count(class="form-control", min="1", max=product.count, step="1", value="1", oninput="setValue(this.value)", onchange="setValue(this.value)", id="counter")}}<br>
+		{%for error in form.count.errors%}
+		<p class="alert alert-danger">{{error}}</p>
+		{%endfor%}
 	</p>
+	<h4>You will pay <div id="cost"></div></h4>
+	<p>
+		{%if product.in_stock%}
+		{{form.buy(type="submit", class="btn btn-primary", style="width: 100%;")}}
+		{%else%}
+		{{form.buy(class="btn btn.disabled", style="width: 100%;")}}
+		{%endif%}
+	</p>
+	<p>{{message}}</p>
 </form>
 {%endblock%}

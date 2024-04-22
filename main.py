@@ -1,4 +1,5 @@
 import flask
+import sqlalchemy as sa
 from flask_login import *
 from data import db_session
 from data.forms.register import RegisterForm
@@ -25,7 +26,7 @@ def main():
 @app.route("/index")
 def index():
     dbs = db_session.create_session()
-    products = dbs.query(Product).all()
+    products = dbs.query(Product).order_by(sa.desc(Product.id)).limit(10).all()
     return flask.render_template("index.html", title="TradeMark'ed", products=products  )
 
 
@@ -154,8 +155,28 @@ def buy_product(product_id):
     dbs = db_session.create_session()
     product = dbs.query(Product).get(product_id)
     if form.validate_on_submit():
-        pass
-    return flask.render_template("buy_product.html", form=form, product=product)
+        quantity = form.count.data
+        cost = product.price * quantity
+        user = dbs.query(User).get(current_user.id)
+        if user.balance < cost:
+            return flask.render_template("buy_product.html", form=form, product=product, message="You have not enough money", title=f"Buy {product.name}")
+        else:
+            user.balance -= cost
+            product.count -= quantity
+            product.seller.balance += cost
+            if product.count == 0:
+                product.in_stock = False
+            dbs.commit()
+            return flask.redirect(f"/buy_product/{product_id}")
+    return flask.render_template("buy_product.html", form=form, product=product, title=f"Buy {product.name}")
+
+
+@app.route("/all_products", methods=["POST", "GET"])
+def all_products():
+    dbs = db_session.create_session()
+    products = dbs.query(Product).order_by(sa.desc(Product.id)).limit(100).all()
+    return flask.render_template("all_products.html", products=products)
+
 
 if __name__ == "__main__":
     main()
