@@ -9,6 +9,7 @@ from data.forms.login import LoginForm
 from data.forms.products import ProductForm
 from data.tag import Tag
 from data.forms.buy import BuyForm
+from data.forms.tag import TagForm
 
 app = flask.Flask(__name__)
 app.config["SECRET_KEY"] = "YliDrERdweBPrOjecTseCrEtKEyhOwThEheCkwIllyOuSeaRcHfORTHaT"
@@ -27,7 +28,7 @@ def main():
 def index():
     dbs = db_session.create_session()
     products = dbs.query(Product).order_by(sa.desc(Product.id)).limit(10).all()
-    return flask.render_template("index.html", title="TradeMark'ed", products=products  )
+    return flask.render_template("index.html", title="TradeMark'ed", products=products)
 
 
 @app.route("/register", methods=["POST", "GET"])
@@ -38,7 +39,8 @@ def register():
             return flask.render_template("register.html", title="Register", form=form, message="Passwords do not maych")
         dbs = db_session.create_session()
         if dbs.query(User).filter(User.email == form.email.data).first():
-            return flask.render_template("register.html", title="Register", form=form, message="User with that email is already registered")
+            return flask.render_template("register.html", title="Register", form=form,
+                                         message="User with that email is already registered")
         user = User(email=form.email.data, name=form.name.data)
         user.set_password(form.password.data)
         dbs.add(user)
@@ -58,7 +60,8 @@ def login():
             current_user.id = user.id
             return flask.redirect("/")
         else:
-            return flask.render_template("login.html", title="Authorization", message="Login or email invalid", form=form)
+            return flask.render_template("login.html", title="Authorization", message="Login or email invalid",
+                                         form=form)
     return flask.render_template("login.html", title="Authorization", form=form)
 
 
@@ -84,7 +87,8 @@ def add_product():
     if form.validate_on_submit():
         dbs = db_session.create_session()
         seller = dbs.query(User).get(current_user.id)
-        product = Product(name=form.name.data, seller_id=current_user.id, seller=seller, price=form.price.data, count=form.count.data, in_stock=True)
+        product = Product(name=form.name.data, seller_id=current_user.id, seller=seller, price=form.price.data,
+                          count=form.count.data, in_stock=True)
         for tg in form.tags.data:
             tag = dbs.query(Tag).filter(Tag.name == tg).first()
             if not tag:
@@ -96,7 +100,7 @@ def add_product():
         dbs.commit()
         return flask.redirect("/my_products")
     else:
-        return flask.render_template("product.html", title="Add Product", paragraph_title="Add Product", form=form)
+        return flask.render_template("product.html", title="Add Product", paragraph_title="Add Product", form=form, tags=[])
 
 
 @app.route("/my_products")
@@ -113,6 +117,7 @@ def edit_product(product_id):
     if isinstance(current_user, AnonymousUserMixin):
         return flask.redirect("/login")
     form = ProductForm()
+    tag_form = TagForm()
     if flask.request.method == "GET":
         dbs = db_session.create_session()
         product = dbs.query(Product).get(product_id)
@@ -122,6 +127,25 @@ def edit_product(product_id):
             form.price.data = product.price
         else:
             flask.abort(404)
+    if tag_form.validate_on_submit():
+        dbs = db_session.create_session()
+        tag = dbs.query(Tag).filter(Tag.name == tag_form.tag_name.data).first()
+        if not tag:
+            tag = Tag(name=tag_form.tag_name.data)
+            dbs.add(tag)
+            dbs.commit()
+        product = dbs.query(Product).get(product_id)
+        product.tags.append(tag)
+        dbs.commit()
+        return flask.redirect(f"/products/{product_id}")
+    if flask.request.form.get("action", 0) != 0:
+        tag_name = flask.request.form["action"][3:]
+        dbs = db_session.create_session()
+        product = dbs.query(Product).get(product_id)
+        tag = dbs.query(Tag).filter(Tag.name == tag_name).first()
+        product.tags.remove(tag)
+        dbs.commit()
+        return flask.redirect(f"/products/{product_id}")
     if form.validate_on_submit():
         dbs = db_session.create_session()
         product = dbs.query(Product).get(product_id)
@@ -132,7 +156,9 @@ def edit_product(product_id):
             dbs.commit()
         else:
             flask.abort(404)
-    return flask.render_template("product.html", title="Edit product", form=form, paragraph_title="Edit product")
+    dbs = db_session.create_session()
+    product = dbs.query(Product).get(product_id)
+    return flask.render_template("product.html", title="Edit product", form=form, paragraph_title="Edit product", tags=product.tags, tag_form=tag_form)
 
 
 @app.route("/delete_product/<int:product_id>")
@@ -159,7 +185,9 @@ def buy_product(product_id):
         cost = product.price * quantity
         user = dbs.query(User).get(current_user.id)
         if user.balance < cost:
-            return flask.render_template("buy_product.html", form=form, product=product, message="You have not enough money", title=f"Buy {product.name}")
+            return flask.render_template("buy_product.html", form=form, product=product,
+                                         message="You have not enough money on your balance",
+                                         title=f"Buy {product.name}")
         else:
             user.balance -= cost
             product.count -= quantity

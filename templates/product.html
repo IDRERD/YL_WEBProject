@@ -30,17 +30,26 @@
 			</p>
 		{%endfor%}
 	</p>
+	{%if product != None%}
+	<form action="" method="post">
 	<p>
-		{{form.tags.label}}<br>
-		{{form.tags(class="form-control")}}<br>
-		{%for error in form.tags.errors%}
-			<p class="alert alert-danger" role="alert">
-				{{error}}
-			</p>
+		{%for tag in tags%}
+		<input style="display: inline-block; background-color: lightgray;" class="btn" name="action" value=" ✖ {{tag.name}}" type="submit">
 		{%endfor%}
-	</p>
+	</p>	
+	</form>
+	{%endif%}
+	<form action="" method="post">
+		{{tag_form.hidden_tag()}}
+		<p>
+		{{tag_form.tag_name.label}}<br>
+		{{tag_form.tag_name(class="form-control")}}
+		</p>
+		<p>
+		{{tag_form.submit(class="btn", style="background-color: lightgreen;")}}
+		</p>
+	</form>
 	<p>
-		{{form.submit.label}}<br>
 		{{form.submit(class="btn btn-primary", type="submit")}}
 	</p>
 </form>
