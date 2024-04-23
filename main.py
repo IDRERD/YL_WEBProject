@@ -89,18 +89,11 @@ def add_product():
         seller = dbs.query(User).get(current_user.id)
         product = Product(name=form.name.data, seller_id=current_user.id, seller=seller, price=form.price.data,
                           count=form.count.data, in_stock=True)
-        for tg in form.tags.data:
-            tag = dbs.query(Tag).filter(Tag.name == tg).first()
-            if not tag:
-                tag = Tag(name=tg)
-                dbs.add(tag)
-                dbs.commit()
-            product.tags.append(tag)
         dbs.add(product)
         dbs.commit()
-        return flask.redirect("/my_products")
+        return flask.redirect(f"/products/{product.id}")
     else:
-        return flask.render_template("product.html", title="Add Product", paragraph_title="Add Product", form=form, tags=[])
+        return flask.render_template("product.html", title="Add Product", paragraph_title="Add Product", form=form, tags=[], tag_form=TagForm(), product=None)
 
 
 @app.route("/my_products")

@@ -38,7 +38,6 @@
 		{%endfor%}
 	</p>	
 	</form>
-	{%endif%}
 	<form action="" method="post">
 		{{tag_form.hidden_tag()}}
 		<p>
@@ -49,6 +48,7 @@
 		{{tag_form.submit(class="btn", style="background-color: lightgreen;")}}
 		</p>
 	</form>
+	{%endif%}
 	<p>
 		{{form.submit(class="btn btn-primary", type="submit")}}
 	</p>
