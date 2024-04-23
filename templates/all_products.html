@@ -3,6 +3,11 @@
 {% block content %}
 <link rel="stylesheet" type="text/css" href="../static/css/index.css">
 <h1 style="text-align: center;">Recently added products</h1>
+<form action="" method="post">
+    <p style="display: inline-block;">Show products that are out of stock?</p> <input type="checkbox" name="show_mode" value="out_of_stock" style="display: inline-block;" {%if "out_of_stock" in show_mode%}checked{%endif%}><br>
+    <p style="display: inline-block;">Show your own products?</p> <input style="display: inline-block;" type="checkbox" name="show_mode" value="your" {%if "your" in show_mode%}checked{%endif%}>
+    <input type="submit" class="btn" style="background-color: greenyellow;">
+</form>
 {% for product in products%}
 <div class="col-md6 border rounded">
     <h2>{{product.name}}</h2>

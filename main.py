@@ -93,7 +93,8 @@ def add_product():
         dbs.commit()
         return flask.redirect(f"/products/{product.id}")
     else:
-        return flask.render_template("product.html", title="Add Product", paragraph_title="Add Product", form=form, tags=[], tag_form=TagForm(), product=None)
+        return flask.render_template("product.html", title="Add Product", paragraph_title="Add Product", form=form,
+                                     tags=[], tag_form=TagForm(), product=None)
 
 
 @app.route("/my_products")
@@ -151,7 +152,8 @@ def edit_product(product_id):
             flask.abort(404)
     dbs = db_session.create_session()
     product = dbs.query(Product).get(product_id)
-    return flask.render_template("product.html", title="Edit product", form=form, paragraph_title="Edit product", tags=product.tags, tag_form=tag_form)
+    return flask.render_template("product.html", title="Edit product", form=form, paragraph_title="Edit product",
+                                 tags=product.tags, tag_form=tag_form)
 
 
 @app.route("/delete_product/<int:product_id>")
@@ -194,9 +196,16 @@ def buy_product(product_id):
 
 @app.route("/all_products", methods=["POST", "GET"])
 def all_products():
+    show_mode = []
+    if flask.request.method == "POST":
+        print(flask.request.form.getlist("show_mode"))
+        show_mode = flask.request.form.getlist("show_mode")
     dbs = db_session.create_session()
-    products = dbs.query(Product).order_by(sa.desc(Product.id)).limit(100).all()
-    return flask.render_template("all_products.html", products=products)
+    products = dbs.query(Product).filter(
+        Product.in_stock.in_([True, False] if "out_of_stock" in show_mode else [True])).filter(Product.seller_id.is_not(
+        -1 if isinstance(current_user, AnonymousUserMixin) or "your" in show_mode else current_user.id)).order_by(
+        sa.desc(Product.id)).limit(100).all()
+    return flask.render_template("all_products.html", products=products, show_mode=show_mode)
 
 
 if __name__ == "__main__":
