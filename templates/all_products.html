@@ -18,7 +18,12 @@
         <label for="desc">Descending</label>
         <input type="checkbox" name="descending" id="desc" value="desc" {%if desc != None%}checked{%endif%}>
     </div>
-    <input type="submit" class="btn" style="background-color: greenyellow;"><br>
+    <div>
+        {%for tag in tags%}
+        <input type="submit" name="del_tag" class="btn" style="display: inline-block; background-color: lightgray;" value=" ✖ {{tag.name}}">
+        {%endfor%}
+    </div>
+    <input type="submit" class="btn" style="background-color: greenyellow;" value="Apply"><br>
 </form>
 {% for product in products%}
 <div class="col-md6 border rounded">

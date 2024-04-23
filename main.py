@@ -1,5 +1,6 @@
 import flask
 import sqlalchemy as sa
+import datetime
 from flask_login import *
 from data import db_session
 from data.forms.register import RegisterForm
@@ -13,9 +14,12 @@ from data.forms.tag import TagForm
 
 app = flask.Flask(__name__)
 app.config["SECRET_KEY"] = "YliDrERdweBPrOjecTseCrEtKEyhOwThEheCkwIllyOuSeaRcHfORTHaT"
+app.config["PERMANENT_SESSION_LIFETIME"] = datetime.timedelta(days=7)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+search_tags = {}
 
 
 def main():
@@ -196,9 +200,13 @@ def buy_product(product_id):
 
 @app.route("/all_products", methods=["POST", "GET"])
 def all_products():
+    global search_tags
     show_mode = []
     order = "latest"
     desc = None
+    if flask.session.get("search_tags", None) is None or True:
+        flask.session["search_tags"] = [Tag(name="SESSION_TEST_TAG")]
+    print(flask.session.get("search_tags"))
     if flask.request.method == "POST":
         order = flask.request.form.get("order", "latest")
         show_mode = flask.request.form.getlist("show_mode")
@@ -216,7 +224,7 @@ def all_products():
     products = dbs.query(Product).filter(
         Product.in_stock.in_([True, False] if "out_of_stock" in show_mode else [True])).filter(Product.seller_id.is_not(
         -1 if isinstance(current_user, AnonymousUserMixin) or "your" in show_mode else current_user.id)).order_by(order).limit(100).all()
-    return flask.render_template("all_products.html", products=products, show_mode=show_mode, title="All products", order=tmporder, desc=desc)
+    return flask.render_template("all_products.html", products=products, show_mode=show_mode, title="All products", order=tmporder, desc=desc, tags=flask.session.get("search_tags", []))
 
 
 if __name__ == "__main__":
