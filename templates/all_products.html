@@ -2,11 +2,23 @@
 
 {% block content %}
 <link rel="stylesheet" type="text/css" href="../static/css/index.css">
-<h1 style="text-align: center;">Recently added products</h1>
+<h1 style="text-align: center;">Search</h1>
 <form action="" method="post">
     <p style="display: inline-block;">Show products that are out of stock?</p> <input type="checkbox" name="show_mode" value="out_of_stock" style="display: inline-block;" {%if "out_of_stock" in show_mode%}checked{%endif%}><br>
-    <p style="display: inline-block;">Show your own products?</p> <input style="display: inline-block;" type="checkbox" name="show_mode" value="your" {%if "your" in show_mode%}checked{%endif%}>
-    <input type="submit" class="btn" style="background-color: greenyellow;">
+    <p style="display: inline-block;">Show your own products?</p> <input style="display: inline-block;" type="checkbox" name="show_mode" value="your" {%if "your" in show_mode%}checked{%endif%}><br>
+    <div>
+        <label for="order-select">Order by</label>
+        <select name="order" id="order-select">
+            <option value="latest" {%if order == "latest"%}selected{%endif%}>Latest</option>
+            <option value="price" {%if order == "price"%}selected{%endif%}>Biggest price</option>
+            <option value="stock" {%if order == "stock"%}selected{%endif%}>Most in stock</option>
+        </select>
+    </div>
+    <div>
+        <label for="desc">Descending</label>
+        <input type="checkbox" name="descending" id="desc" value="desc" {%if desc != None%}checked{%endif%}>
+    </div>
+    <input type="submit" class="btn" style="background-color: greenyellow;"><br>
 </form>
 {% for product in products%}
 <div class="col-md6 border rounded">

@@ -4,4 +4,4 @@ from wtforms.validators import DataRequired
 
 
 class FilterForm(FlaskForm):
-    pass
+    order = SelectField("Order by", choices=["Latest", "Biggest price", "Most in stock"])

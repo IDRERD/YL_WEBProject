@@ -197,15 +197,26 @@ def buy_product(product_id):
 @app.route("/all_products", methods=["POST", "GET"])
 def all_products():
     show_mode = []
+    order = "latest"
+    desc = None
     if flask.request.method == "POST":
-        print(flask.request.form.getlist("show_mode"))
+        order = flask.request.form.get("order", "latest")
         show_mode = flask.request.form.getlist("show_mode")
+        desc = flask.request.form.get("descending")
+    tmporder = order[:]
+    if order == "price":
+        order = Product.price
+    elif order == "stock":
+        order = Product.count
+    else:
+        order = Product.id
+    if desc is None:
+        order = sa.desc(order)
     dbs = db_session.create_session()
     products = dbs.query(Product).filter(
         Product.in_stock.in_([True, False] if "out_of_stock" in show_mode else [True])).filter(Product.seller_id.is_not(
-        -1 if isinstance(current_user, AnonymousUserMixin) or "your" in show_mode else current_user.id)).order_by(
-        sa.desc(Product.id)).limit(100).all()
-    return flask.render_template("all_products.html", products=products, show_mode=show_mode)
+        -1 if isinstance(current_user, AnonymousUserMixin) or "your" in show_mode else current_user.id)).order_by(order).limit(100).all()
+    return flask.render_template("all_products.html", products=products, show_mode=show_mode, title="All products", order=tmporder, desc=desc)
 
 
 if __name__ == "__main__":
