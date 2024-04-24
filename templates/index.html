@@ -20,7 +20,7 @@
         Price: {{product.price}}
     </div>
     {%if current_user.is_authenticated%}
-    {%if product.seller_id != current_user.id%}
+    {%if product.seller_id != current_user.id and product.in_stock%}
     <a href="/buy_product/{{product.id}}" class="btn btn-success">Buy</a>
     {%endif%}
     {%endif%}

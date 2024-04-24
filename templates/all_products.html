@@ -22,7 +22,11 @@
         {%for tag in tags%}
         <input type="submit" name="del_tag" class="btn" style="display: inline-block; background-color: lightgray;" value=" ✖ {{tag.name}}">
         {%endfor%}
-    </div>
+    </div><br>
+    <div>
+        <label for="tag_name">Tag name</label>
+        <input type="text" name="tag_name" id="tag_name" placeholder="Enter new tag name">
+    </div><br>
     <input type="submit" class="btn" style="background-color: greenyellow;" value="Apply"><br>
 </form>
 {% for product in products%}
@@ -35,7 +39,7 @@
         Price: {{product.price}}
     </div>
     {%if current_user.is_authenticated%}
-    {%if product.seller_id != current_user.id%}
+    {%if product.seller_id != current_user.id and product.in_stock%}
     <a href="/buy_product/{{product.id}}" class="btn btn-success">Buy</a>
     {%endif%}
     {%endif%}

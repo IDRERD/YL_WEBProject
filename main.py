@@ -1,6 +1,8 @@
 import flask
 import sqlalchemy as sa
 import datetime
+
+import sqlalchemy.ext.hybrid
 from flask_login import *
 from data import db_session
 from data.forms.register import RegisterForm
@@ -18,8 +20,6 @@ app.config["PERMANENT_SESSION_LIFETIME"] = datetime.timedelta(days=7)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-
-search_tags = {}
 
 
 def main():
@@ -204,13 +204,21 @@ def all_products():
     show_mode = []
     order = "latest"
     desc = None
-    if flask.session.get("search_tags", None) is None or True:
-        flask.session["search_tags"] = [Tag(name="SESSION_TEST_TAG")]
-    print(flask.session.get("search_tags"))
+    if len(flask.session.get("search_tags", [])) == 0:
+        flask.session["search_tags"] = []
     if flask.request.method == "POST":
         order = flask.request.form.get("order", "latest")
         show_mode = flask.request.form.getlist("show_mode")
         desc = flask.request.form.get("descending")
+        new_tag_name = flask.request.form.get("tag_name", "")
+        if new_tag_name:
+            st = flask.session["search_tags"]
+            st.append(new_tag_name)
+            flask.session["search_tags"] = st
+        if flask.request.form.get("del_tag") is not None:
+            st = flask.session["search_tags"]
+            st.remove(flask.request.form.get("del_tag")[3:])
+            flask.session["search_tags"] = st
     tmporder = order[:]
     if order == "price":
         order = Product.price
@@ -220,11 +228,16 @@ def all_products():
         order = Product.id
     if desc is None:
         order = sa.desc(order)
+    tags = [Tag(name=i) for i in flask.session.get("search_tags", [])]
     dbs = db_session.create_session()
     products = dbs.query(Product).filter(
         Product.in_stock.in_([True, False] if "out_of_stock" in show_mode else [True])).filter(Product.seller_id.is_not(
-        -1 if isinstance(current_user, AnonymousUserMixin) or "your" in show_mode else current_user.id)).order_by(order).limit(100).all()
-    return flask.render_template("all_products.html", products=products, show_mode=show_mode, title="All products", order=tmporder, desc=desc, tags=flask.session.get("search_tags", []))
+        -1 if isinstance(current_user, AnonymousUserMixin) or "your" in show_mode else current_user.id)).order_by(
+        order).limit(100).all()
+    if len(tags):
+        products = list(filter(lambda x: any([i in tags for i in x.tags]), products))
+    return flask.render_template("all_products.html", products=products, show_mode=show_mode, title="All products",
+                                 order=tmporder, desc=desc, tags=tags)
 
 
 if __name__ == "__main__":
