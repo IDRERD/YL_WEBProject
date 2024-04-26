@@ -15,7 +15,7 @@
         </select>
     </div>
     <div>
-        <label for="desc">Descending</label>
+        <label for="desc">Ascending</label>
         <input type="checkbox" name="descending" id="desc" value="desc" {%if desc != None%}checked{%endif%}>
     </div>
     <div>
@@ -27,6 +27,14 @@
         <label for="tag_name">Tag name</label>
         <input type="text" name="tag_name" id="tag_name" placeholder="Enter new tag name">
     </div><br>
+    <div>
+        <label for="price_from">Price from</label>
+        <input type="number" name="price_from" id="price_from" min="1" step="1" value="{{session["price_from"]}}">
+    </div>
+    <div>
+        <label for="price_to" style="padding-left: 43.5pt;">to</label>
+        <input type="number" name="price_to" id="price_to" min="1" step="1" value="{{session["price_to"]}}">
+    </div>
     <input type="submit" class="btn" style="background-color: greenyellow;" value="Apply"><br>
 </form>
 {% for product in products%}

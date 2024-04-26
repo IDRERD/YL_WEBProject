@@ -2,13 +2,13 @@
 
 {% block content %}
 <link rel="stylesheet" type="text/css" href="../static/css/index.css">
-{% if current_user.is_authenticated %}
 <p style="text-align: center;">
-    <a href="all_products" class="btn btn-secondary" style="font-size: 16pt;">All products</a>
+<a href="all_products" class="btn btn-secondary" style="font-size: 16pt;">All products</a>
+{% if current_user.is_authenticated %}
     <a href="products" class="btn btn-secondary" style="font-size: 16pt;">Set sell order</a>
     <a href="my_products" class="btn btn-secondary" style="font-size: 16pt;">See your products</a>
-</p>
 {% endif %}
+</p>
 <h1 style="text-align: center;">Recently added products</h1>
 {% for product in products%}
 <div class="col-md6 border rounded">

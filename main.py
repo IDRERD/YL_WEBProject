@@ -204,6 +204,10 @@ def all_products():
     show_mode = []
     order = "latest"
     desc = None
+    if flask.session.get("price_from") is None:
+        flask.session["price_from"] = ""
+    if flask.session.get("price_to") is None:
+        flask.session["price_to"] = ""
     if len(flask.session.get("search_tags", [])) == 0:
         flask.session["search_tags"] = []
     if flask.request.method == "POST":
@@ -219,6 +223,8 @@ def all_products():
             st = flask.session["search_tags"]
             st.remove(flask.request.form.get("del_tag")[3:])
             flask.session["search_tags"] = st
+        flask.session["price_from"] = flask.request.form.get("price_from")
+        flask.session["price_to"] = flask.request.form.get("price_to")
     tmporder = order[:]
     if order == "price":
         order = Product.price
@@ -236,8 +242,12 @@ def all_products():
         order).limit(100).all()
     if len(tags):
         products = list(filter(lambda x: any([i in tags for i in x.tags]), products))
+    if flask.session.get("price_from"):
+        products = list(filter(lambda x: x.price >= int(flask.session.get("price_from")), products))
+    if flask.session.get("price_to"):
+        products = list(filter(lambda x: x.price <= int(flask.session.get("price_to")), products))
     return flask.render_template("all_products.html", products=products, show_mode=show_mode, title="All products",
-                                 order=tmporder, desc=desc, tags=tags)
+                                 order=tmporder, desc=desc, tags=tags, session=flask.session)
 
 
 if __name__ == "__main__":
