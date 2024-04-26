@@ -1,6 +1,17 @@
 {%extends "base.html"%}
 {%block content%}
+<link rel="stylesheet" type="text/css" href="../static/css/product.css">
 <h1>{{paragraph_title}}</h1>
+{%if product != None%}
+<img src="../static/images/products/{%if not img_default%}{{product.id}}{%else%}default{%endif%}.png" class="photo">
+<form method="post" enctype="multipart/form-data" style="text-align: center;">
+	<div>
+		<label for="photo">Load photo</label>
+		<input type="file" name="photo" id="photo">
+	</div>
+	<button type="submit" class="btn" style="background-color: salmon;">Load</button>
+</form>
+{%endif%}
 <form action="" method="post">
 	{{form.hidden_tag()}}
 	<p>

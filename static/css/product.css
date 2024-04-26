@@ -1,0 +1,7 @@
+.photo{
+	border-style: dashed;
+	border-color: black;
+	margin: auto;
+	display: block;
+	width: 50%;
+}

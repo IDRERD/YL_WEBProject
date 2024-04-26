@@ -9,7 +9,9 @@
 	}
 	document.addEventListener("DOMContentLoaded", loaded);
 </script>
+<link rel="stylesheet" type="text/css" href="../static/css/product.css">
 <h1 style="text-align: center;">{{product.name}}</h1>
+<img src="../static/images/products/{%if not img_default%}{{product.id}}{%else%}default{%endif%}.png" class="photo">
 {%if product.in_stock%}
 <h3>{{product.count}} available</h3>
 {%else%}
@@ -33,6 +35,6 @@
 		{{form.buy(class="btn btn.disabled", style="width: 100%;")}}
 		{%endif%}
 	</p>
-	<p class="alert alert-danger">{{message}}</p>
+	{%if message%}<p class="alert alert-danger">{{message}}</p>{%endif%}
 </form>
 {%endblock%}

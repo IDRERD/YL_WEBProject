@@ -22,6 +22,9 @@
     <div class="tml">
         Price: {{product.price}}
     </div>
+    {%if img_names[loop.index0] != "default"%}
+    <img src="../static/images/products/{{img_names[loop.index0]}}.png" class="photo">
+    {%endif%}
     {%if not product.in_stock%}
     <div class="tml">Product is out of stock</div>
     {%else%}

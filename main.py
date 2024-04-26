@@ -1,8 +1,8 @@
+import glob
+
 import flask
 import sqlalchemy as sa
 import datetime
-
-import sqlalchemy.ext.hybrid
 from flask_login import *
 from data import db_session
 from data.forms.register import RegisterForm
@@ -32,7 +32,10 @@ def main():
 def index():
     dbs = db_session.create_session()
     products = dbs.query(Product).order_by(sa.desc(Product.id)).limit(10).all()
-    return flask.render_template("index.html", title="TradeMark'ed", products=products)
+    img_names = [file[file.rfind('\\') + 1:file.rfind('.')] for file in glob.glob("static/images/products/*.png")]
+    product_ids = [str(product.id) for product in products]
+    img_names = [p_id if p_id in img_names else "default" for p_id in product_ids]
+    return flask.render_template("index.html", title="TradeMark'ed", products=products, img_names=img_names)
 
 
 @app.route("/register", methods=["POST", "GET"])
@@ -106,8 +109,11 @@ def my_products():
     if not current_user.is_authenticated:
         return flask.redirect("/login")
     dbs = db_session.create_session()
-    products = dbs.query(Product).filter(Product.seller_id == current_user.id)
-    return flask.render_template("my_products.html", title="My Products", products=products)
+    products = dbs.query(Product).order_by(sa.desc(Product.id)).filter(Product.seller_id == current_user.id)
+    img_names = [file[file.rfind('\\') + 1:file.rfind('.')] for file in glob.glob("static/images/products/*.png")]
+    product_ids = [str(product.id) for product in products]
+    img_names = [p_id if p_id in img_names else "default" for p_id in product_ids]
+    return flask.render_template("my_products.html", title="My Products", products=products, img_names=img_names)
 
 
 @app.route("/products/<int:product_id>", methods=["POST", "GET"])
@@ -116,6 +122,15 @@ def edit_product(product_id):
         return flask.redirect("/login")
     form = ProductForm()
     tag_form = TagForm()
+    dbs = db_session.create_session()
+    product = dbs.query(Product).get(product_id)
+    dbs.close()
+    form.name.data = product.name
+    form.count.data = product.count
+    form.price.data = product.price
+    if flask.request.method == "POST":
+        if flask.request.files.get("photo") is not None and flask.request.files["photo"].filename != "":
+            flask.request.files["photo"].save(f"static/images/products/{product_id}.png")
     if flask.request.method == "GET":
         dbs = db_session.create_session()
         product = dbs.query(Product).get(product_id)
@@ -156,8 +171,9 @@ def edit_product(product_id):
             flask.abort(404)
     dbs = db_session.create_session()
     product = dbs.query(Product).get(product_id)
+    img_default = len(glob.glob(f"static/images/products/{product_id}.png")) == 0
     return flask.render_template("product.html", title="Edit product", form=form, paragraph_title="Edit product",
-                                 tags=product.tags, tag_form=tag_form)
+                                 tags=product.tags, tag_form=tag_form, product=product, img_default=img_default)
 
 
 @app.route("/delete_product/<int:product_id>")
@@ -195,7 +211,9 @@ def buy_product(product_id):
                 product.in_stock = False
             dbs.commit()
             return flask.redirect(f"/buy_product/{product_id}")
-    return flask.render_template("buy_product.html", form=form, product=product, title=f"Buy {product.name}")
+    img_default = len(glob.glob(f"static/images/products/{product_id}.png")) == 0
+    return flask.render_template("buy_product.html", form=form, product=product, title=f"Buy {product.name}",
+                                 img_default=img_default)
 
 
 @app.route("/all_products", methods=["POST", "GET"])
@@ -246,8 +264,11 @@ def all_products():
         products = list(filter(lambda x: x.price >= int(flask.session.get("price_from")), products))
     if flask.session.get("price_to"):
         products = list(filter(lambda x: x.price <= int(flask.session.get("price_to")), products))
+    img_names = [file[file.rfind('\\') + 1:file.rfind('.')] for file in glob.glob("static/images/products/*.png")]
+    product_ids = [str(product.id) for product in products]
+    img_names = [p_id if p_id in img_names else "default" for p_id in product_ids]
     return flask.render_template("all_products.html", products=products, show_mode=show_mode, title="All products",
-                                 order=tmporder, desc=desc, tags=tags, session=flask.session)
+                                 order=tmporder, desc=desc, tags=tags, session=flask.session, img_names=img_names)
 
 
 if __name__ == "__main__":

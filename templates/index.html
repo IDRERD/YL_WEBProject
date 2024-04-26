@@ -24,6 +24,9 @@
     <a href="/buy_product/{{product.id}}" class="btn btn-success">Buy</a>
     {%endif%}
     {%endif%}
+    {%if img_names[loop.index0] != "default"%}
+    <img src="../static/images/products/{{img_names[loop.index0]}}.png" class="photo">
+    {%endif%}
     {%if not product.in_stock%}
     <div class="tml">Product is out of stock</div>
     {%else%}
