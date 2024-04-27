@@ -1,8 +1,8 @@
 import glob
-
 import flask
 import sqlalchemy as sa
 import datetime
+import flask_restful as fr
 from flask_login import *
 from data import db_session
 from data.forms.register import RegisterForm
@@ -13,10 +13,13 @@ from data.forms.products import ProductForm
 from data.tag import Tag
 from data.forms.buy import BuyForm
 from data.forms.tag import TagForm
+from data.api.users_resource import UserResource, UserListResource
 
 app = flask.Flask(__name__)
 app.config["SECRET_KEY"] = "YliDrERdweBPrOjecTseCrEtKEyhOwThEheCkwIllyOuSeaRcHfORTHaT"
 app.config["PERMANENT_SESSION_LIFETIME"] = datetime.timedelta(days=7)
+
+api = fr.Api(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -24,6 +27,8 @@ login_manager.init_app(app)
 
 def main():
     db_session.global_init("db/market.db")
+    api.add_resource(UserResource, "/api/v1/users/<int:user_id>")
+    api.add_resource(UserListResource, "/api/v1/users")
     app.run()
 
 
