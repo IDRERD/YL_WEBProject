@@ -36,7 +36,6 @@ class UserResource(fr.Resource):
             return flask.make_response(flask.jsonify({"error": "Wrong password or email"}))
         dbs.delete(user)
         dbs.commit()
-        dbs.close()
         return flask.jsonify({"success": "OK"})
 
 

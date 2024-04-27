@@ -7,7 +7,7 @@ from data.users import User
 
 parser = reqparse.RequestParser()
 parser.add_argument("name", required=True)
-parser.add_argument("user_id", required=True)
+parser.add_argument("seller_id", required=True)
 parser.add_argument("price", required=True)
 parser.add_argument("count", required=True)
 
