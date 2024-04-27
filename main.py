@@ -14,6 +14,7 @@ from data.tag import Tag
 from data.forms.buy import BuyForm
 from data.forms.tag import TagForm
 from data.api.users_resource import UserResource, UserListResource
+from data.api.products_resource import ProductResource, ProductListResource
 
 app = flask.Flask(__name__)
 app.config["SECRET_KEY"] = "YliDrERdweBPrOjecTseCrEtKEyhOwThEheCkwIllyOuSeaRcHfORTHaT"
@@ -29,6 +30,8 @@ def main():
     db_session.global_init("db/market.db")
     api.add_resource(UserResource, "/api/v1/users/<int:user_id>")
     api.add_resource(UserListResource, "/api/v1/users")
+    api.add_resource(ProductListResource, "/api/v1/products")
+    api.add_resource(ProductResource, "/api/v1/products/<int:product_id>")
     app.run()
 
 
